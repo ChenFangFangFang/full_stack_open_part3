@@ -3,8 +3,8 @@ const app = express()
 const morgan = require('morgan');
 const cors = require('cors')
 app.use(morgan('tiny'));
-
 app.use(cors())
+app.use(express.static('dist'))
 app.use(express.json())
 const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
