@@ -18,3 +18,21 @@ content-type: application/json
     "name": "Fangfang2",
     "number": "400-400-400"
 }
+
+###
+POST http://localhost:3001/api/persons/ 
+content-type: application/json
+
+{
+    "name": "Fangfang3",
+    "number": "400-400-400"
+}
+
+###
+PUT http://localhost:3001/api/persons/67264c0a01e0ac77339775ae
+content-type: application/json
+
+{
+    "name": "Fangfang3-update",
+    "number": "400-400-411"
+}
