@@ -1,35 +1,47 @@
-require('dotenv').config()
 const Phonebook = require('./models/phonebook')
 const express = require('express')
-const morgan = require('morgan');
 const cors = require('cors')
 const app = express()
+const mongoose = require('mongoose')
 
-app.use(morgan('tiny'));
+require('dotenv').config()
+
+const morgan = require('morgan')
+morgan.token('body', (req) => JSON.stringify(req.body))
+const mongoUrl = process.env.MONGODB_URI
+
+mongoose.connect(mongoUrl)
+  .then(result => {
+    console.log('connected to MongoDB')
+  })
+  .catch(error => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
+app.use(morgan('tiny'))
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
 // app.use(requestLogger)
 
 // Routes
-app.get("/api/persons", (request, response) => {
+app.get('/api/persons', (request, response) => {
   Phonebook.find({}).then(persons => {
     response.json(persons)
   })
 
 })
-app.get("/info", (request, response) => {
+app.get('/info', (request, response) => {
   Phonebook.countDocuments({}).then(count => {
-    const currentDate = new Date();
+    const currentDate = new Date()
     const message = `
           <p>Phonebook has info for ${count} people</p>
           <p>${currentDate}</p>
-      `;
-    response.send(message);
-  });
-});
+      `
+    response.send(message)
+  })
+})
 
-app.get("/api/persons/:id", (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Phonebook.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -41,7 +53,7 @@ app.get("/api/persons/:id", (request, response) => {
     })
     .catch(error => next(error))
 })
-app.delete("/api/persons/:id", (request, response, next) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Phonebook.findByIdAndDelete(request.params.id)
     .then(request => {
       response.status(204).end()

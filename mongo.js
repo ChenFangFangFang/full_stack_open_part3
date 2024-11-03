@@ -1,52 +1,35 @@
 const mongoose = require('mongoose')
+const Phonebook = require('./models/phonebook')
 
+const url = process.env.MONGODB_URI
 if (process.argv.length < 3) {
   console.log('give password as argument')
   process.exit(1)
 }
-
-const password = process.argv[2]
-const name = process.argv[3];
-const number = process.argv[4];
-
-
+mongoose.connect(url)
 mongoose.set('strictQuery', false)
 
-mongoose.connect(url)
+console.log('connecting to', url)
 
-const phonebookSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
+if (process.argv.length === 3) {
+  Phonebook.find({}).then(result => {
+    console.log('phonebook:')
 
-const Phonebook = mongoose.model('Phonebook', phonebookSchema)
-
-if (!name || !number) {
-  Phonebook.find({})
-    .then(result => {
-      console.log('Phonebook entries:');
-      result.forEach(entry => {
-        console.log(`${entry.name} ${entry.number}`);
-      });
-      mongoose.connection.close();
+    result.forEach(person => {
+      console.log(`${person.name.padEnd(20)} ${person.number}`)
     })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-      mongoose.connection.close();
-    });
-} else {
+    mongoose.connection.close()
+    process.exit(1)
+  })
+} else if (process.argv.length === 5) {
   const phonebook = new Phonebook({
-    name: name,
-    number: number,
-  });
+    name: process.argv[3],
+    number: process.argv[4],
+  })
 
-  phonebook.save()
-    .then(() => {
-      console.log(`Added ${name} number ${number} to phonebook`);
-      mongoose.connection.close();
-    })
-    .catch(error => {
-      console.error('Error saving data:', error);
-      mongoose.connection.close();
-    });
+  Phonebook.save().then(() => {
+    console.log('person saved!')
+    mongoose.connection.close()
+    process.exit(1)
+  })
 }
